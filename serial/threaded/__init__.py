@@ -155,7 +155,7 @@ class ReaderThread(threading.Thread):
     stop() this thread and continue the serial port instance otherwise.
     """
 
-    def __init__(self, serial_instance, protocol_factory):
+    def __init__(self, serial_instance, protocol_factory, return_none_on_timeout=False):
         """\
         Initialize thread.
 
@@ -170,6 +170,7 @@ class ReaderThread(threading.Thread):
         self._lock = threading.Lock()
         self._connection_made = threading.Event()
         self.protocol = None
+        self.return_none_on_timeout = return_none_on_timeout
 
     def stop(self):
         """Stop the reader thread"""
@@ -202,7 +203,7 @@ class ReaderThread(threading.Thread):
                 error = e
                 break
             else:
-                if data:
+                if data or self.return_none_on_timeout:
                     # make a separated try-except for called user code
                     try:
                         self.protocol.data_received(data)
